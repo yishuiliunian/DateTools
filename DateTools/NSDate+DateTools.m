@@ -1610,7 +1610,7 @@ static NSCalendar *implicitCalendar = nil;
 }
 
 /**
- *  Convenience method that returns a formatted string representing the receiver's date formatted to a given style, time zone and locale
+ *  Convenience method that returns a formatted string representing the receiver's date formatted to a given style, time zone and locale.
  *
  *  @param style    NSDateFormatterStyle - Desired date formatting style
  *  @param timeZone NSTimeZone - Desired time zone
@@ -1630,18 +1630,22 @@ static NSCalendar *implicitCalendar = nil;
         [formatter setLocale:locale];
         return [formatter stringFromDate:self];
     } else {
+
+        static  NSRecursiveLock * formatterLock;
         static NSDateFormatter* formatter = nil;
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
             formatter = [[NSDateFormatter alloc] init];
+            formatterLock = [NSRecursiveLock new];
         });
+
         NSString* formatDateString = nil;
-        @synchronized (formatter) {
-            [formatter setDateStyle:style];
-            [formatter setTimeZone:timeZone];
-            [formatter setLocale:locale];
-            formatDateString = [formatter stringFromDate:self];
-        }
+        [formatterLock tryLock];
+        [formatter setDateStyle:style];
+        [formatter setTimeZone:timeZone];
+        [formatter setLocale:locale];
+        formatDateString = [formatter stringFromDate:self];
+        [formatterLock unlock];
         return formatDateString;
     }
 }
@@ -1704,19 +1708,21 @@ static NSCalendar *implicitCalendar = nil;
         [formatter setLocale:locale];
         return [formatter stringFromDate:self];
     } else {
+        static  NSRecursiveLock * formatterLock;
         static NSDateFormatter* formatter = nil;
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
             formatter = [[NSDateFormatter alloc] init];
+            formatterLock = [NSRecursiveLock new];
         });
 
         NSString* formatDateString = nil;
-        @synchronized (formatter) {
-            [formatter setDateFormat:format];
-            [formatter setTimeZone:timeZone];
-            [formatter setLocale:locale];
-            formatDateString = [formatter stringFromDate:self];
-        }
+        [formatterLock tryLock];
+        [formatter setDateFormat:format];
+        [formatter setTimeZone:timeZone];
+        [formatter setLocale:locale];
+        formatDateString = [formatter stringFromDate:self];
+        [formatterLock unlock];
         return formatDateString;
     }
 }
