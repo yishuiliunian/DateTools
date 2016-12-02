@@ -495,7 +495,6 @@ static NSCalendar *implicitCalendar = nil;
 	NSDate *today = [cal dateFromComponents:components];
 	components = [cal components:(NSCalendarUnitEra|NSCalendarUnitYear|NSCalendarUnitMonth|NSCalendarUnitDay) fromDate:self];
 	NSDate *otherDate = [cal dateFromComponents:components];
-
 	return [today isEqualToDate:otherDate];
 }
 
@@ -505,7 +504,6 @@ static NSCalendar *implicitCalendar = nil;
 	NSDate *tomorrow = [cal dateFromComponents:components];
 	components = [cal components:(NSCalendarUnitEra|NSCalendarUnitYear|NSCalendarUnitMonth|NSCalendarUnitDay) fromDate:self];
 	NSDate *otherDate = [cal dateFromComponents:components];
-    
 	return [tomorrow isEqualToDate:otherDate];
 }
 
@@ -1631,21 +1629,13 @@ static NSCalendar *implicitCalendar = nil;
         return [formatter stringFromDate:self];
     } else {
 
-        static  NSRecursiveLock * formatterLock;
-        static NSDateFormatter* formatter = nil;
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            formatter = [[NSDateFormatter alloc] init];
-            formatterLock = [NSRecursiveLock new];
-        });
-
+        NSDateFormatter* formatter = nil;
+        formatter = [[NSDateFormatter alloc] init];
         NSString* formatDateString = nil;
-        [formatterLock tryLock];
         [formatter setDateStyle:style];
         [formatter setTimeZone:timeZone];
         [formatter setLocale:locale];
         formatDateString = [formatter stringFromDate:self];
-        [formatterLock unlock];
         return formatDateString;
     }
 }
@@ -1708,21 +1698,13 @@ static NSCalendar *implicitCalendar = nil;
         [formatter setLocale:locale];
         return [formatter stringFromDate:self];
     } else {
-        static  NSRecursiveLock * formatterLock;
-        static NSDateFormatter* formatter = nil;
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            formatter = [[NSDateFormatter alloc] init];
-            formatterLock = [NSRecursiveLock new];
-        });
-
+         NSDateFormatter* formatter = nil;
+        formatter = [[NSDateFormatter alloc] init];
         NSString* formatDateString = nil;
-        [formatterLock tryLock];
         [formatter setDateFormat:format];
         [formatter setTimeZone:timeZone];
         [formatter setLocale:locale];
         formatDateString = [formatter stringFromDate:self];
-        [formatterLock unlock];
         return formatDateString;
     }
 }
